@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
         mTextView.setText(getResources().getString(R.string.selection));
 
         connectToTMDB("popular");
-
+        //TODO REQUIREMENT Movies should be displayed in the main layout once the app starts, device orientation changes etc.
     }
 
     @Override
@@ -56,9 +56,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
         switch (item.getItemId()){
             case R.id.popular:
                                 Toast.makeText(getApplicationContext(), "Searching Popular Movies" , Toast.LENGTH_LONG).show(); connectToTMDB("popular"); break;
+            //TODO REQUIREMENT Move string literals to strings.xml or use constants as appropriate
             case R.id.top_rated:
                                 Toast.makeText(getApplicationContext(), "Searching Top Rated Movies" , Toast.LENGTH_LONG).show(); connectToTMDB("top_rated");break;
         }
+        //TODO REQUIREMENT Follow the Java Coding & Styling guidelines.
 
         return super.onOptionsItemSelected(item);
     }
@@ -94,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
     }
 
     public class GetTMDBResults extends AsyncTask<URL, Void, String>{
+        //TODO SUGGESTION Consider using AsyncTaskLoader
 
         @Override
         protected String doInBackground(URL... params) {
@@ -105,12 +108,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
                 e.printStackTrace();
             }
             return TMDBResults;
+            //TODO AWESOME You're doing network operations on a background thread.
         }
 
         @Override
         protected void onPostExecute(String TMDBResults){
             if(TMDBResults != null && !TMDBResults.equals("")){
                 jsonParser(TMDBResults);
+                //TODO SUGGESTION Consider moving this into doInBackground rather than doing it on your UI thread
             }
         }
 
