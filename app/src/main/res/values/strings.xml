@@ -6,6 +6,8 @@
     <string name="top_rated">Top Rated</string>
     <string name="selection">Please Select from the drop down menu</string>
     <!--TODO (1) Add your api key in string api_key-->
-    <string name="api_key" ></string>
+    <string name="api_key" >5d99537ddb261c23437d3d2a8b33bac0</string>
     <string name="json_error">Sorry, something went wrong when receiving movies</string>
+    <string name="toast_popular">Searching Popular Movies</string>
+    <string name="toast_top">Searching Top Rated Movies</string>
 </resources>

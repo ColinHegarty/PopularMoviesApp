@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
         setContentView(R.layout.activity_main);
 
         mTextView = (TextView) findViewById(R.id.textView_default);
-        mTextView.setText(getResources().getString(R.string.selection));
+        mTextView.setText(getResources().getString(R.string.welcome));
 
         connectToTMDB("popular");
         //TODO REQUIREMENT Movies should be displayed in the main layout once the app starts, device orientation changes etc.
@@ -55,12 +56,16 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
         listOfMovies.clear();
         switch (item.getItemId()){
             case R.id.popular:
-                                Toast.makeText(getApplicationContext(), "Searching Popular Movies" , Toast.LENGTH_LONG).show(); connectToTMDB("popular"); break;
-            //TODO REQUIREMENT Move string literals to strings.xml or use constants as appropriate
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.toast_popular) , Toast.LENGTH_LONG).show();
+                                connectToTMDB("popular");
+                                break;
+            //TODO REQUIREMENT Move string literals to strings.xml or use constants as appropriate DONE
             case R.id.top_rated:
-                                Toast.makeText(getApplicationContext(), "Searching Top Rated Movies" , Toast.LENGTH_LONG).show(); connectToTMDB("top_rated");break;
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.toast_top) , Toast.LENGTH_LONG).show();
+                                connectToTMDB("top_rated");
+                                break;
         }
-        //TODO REQUIREMENT Follow the Java Coding & Styling guidelines.
+        //TODO REQUIREMENT Follow the Java Coding & Styling guidelines. DONE
 
         return super.onOptionsItemSelected(item);
     }
@@ -107,19 +112,26 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            if(TMDBResults != null && !TMDBResults.equals("")) {
+                jsonParser(TMDBResults);
+            }
+
             return TMDBResults;
             //TODO AWESOME You're doing network operations on a background thread.
         }
 
         @Override
         protected void onPostExecute(String TMDBResults){
-            if(TMDBResults != null && !TMDBResults.equals("")){
-                jsonParser(TMDBResults);
+            mTextView.setVisibility(View.INVISIBLE);
+            mMovieList.setVisibility(View.VISIBLE);
+//            if(TMDBResults != null && !TMDBResults.equals("")){
+//                jsonParser(TMDBResults);
                 //TODO SUGGESTION Consider moving this into doInBackground rather than doing it on your UI thread
-            }
+//            }
         }
 
-        public void jsonParser(String TMDBResults){
+        private void jsonParser(String TMDBResults){
             JSONObject results = null;
             JSONArray movie = null;
             try{
