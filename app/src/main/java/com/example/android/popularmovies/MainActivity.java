@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -38,10 +39,20 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTextView = (TextView) findViewById(R.id.textView_default);
-        mTextView.setText(getResources().getString(R.string.welcome));
+//        mTextView = (TextView) findViewById(R.id.textView_default);
+        //mTextView.setText(getResources().getString(R.string.welcome));
+        listOfMovies.clear();
+        GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 3);
+
+        mMovieList = (RecyclerView) findViewById(R.id.rv_movies);
+        mMovieList.setLayoutManager(layoutManager);
+        mMovieList.setHasFixedSize(true);
+        mAdapter = new MovieAdapter(getApplicationContext(),listOfMovies, this);
 
         connectToTMDB("popular");
+
+
+
         //TODO REQUIREMENT Movies should be displayed in the main layout once the app starts, device orientation changes etc.
     }
 
@@ -53,14 +64,16 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        listOfMovies.clear();
+
         switch (item.getItemId()){
             case R.id.popular:
+                                listOfMovies.clear();
                                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.toast_popular) , Toast.LENGTH_LONG).show();
                                 connectToTMDB("popular");
                                 break;
             //TODO REQUIREMENT Move string literals to strings.xml or use constants as appropriate DONE
             case R.id.top_rated:
+                                listOfMovies.clear();
                                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.toast_top) , Toast.LENGTH_LONG).show();
                                 connectToTMDB("top_rated");
                                 break;
@@ -74,6 +87,22 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
         String connectionString = "https://api.themoviedb.org/3/movie/"+ query + "?api_key=" + getResources().getString(R.string.api_key);
         URL movieSearchUrl =  NetworkUtils.buildURL(connectionString);
         new GetTMDBResults().execute(movieSearchUrl);
+    }
+
+    private void setUpRecyclerView(){
+        Log.e("setUpRecyclerView:", " entering method");
+
+
+
+
+        mMovieList.setAdapter(mAdapter);
+
+
+
+
+//        mTextView.setVisibility(View.INVISIBLE);
+
+//        mMovieList.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -123,8 +152,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
 
         @Override
         protected void onPostExecute(String TMDBResults){
-            mTextView.setVisibility(View.INVISIBLE);
-            mMovieList.setVisibility(View.VISIBLE);
+            Log.e("On Post:", "Results back: "+TMDBResults);
+                setUpRecyclerView();
+
+//            setUpRecyclerView();
 //            if(TMDBResults != null && !TMDBResults.equals("")){
 //                jsonParser(TMDBResults);
                 //TODO SUGGESTION Consider moving this into doInBackground rather than doing it on your UI thread
@@ -143,25 +174,13 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
                     listOfMovies.add(mov);
                 }
 
-                setUpRecyclerView(listOfMovies);
-
             }catch(JSONException e){
                 e.printStackTrace();
             }
         }
 
-        public void setUpRecyclerView(ArrayList listOfMovies){
-            mMovieList = (RecyclerView) findViewById(R.id.rv_movies);
-            GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 3);
-            mMovieList.setLayoutManager(layoutManager);
 
-            mMovieList.setHasFixedSize(true);
 
-            mAdapter = new MovieAdapter(getApplicationContext(),listOfMovies, mainActivity);
-
-            mMovieList.setAdapter(mAdapter);
-
-        }
     }
 
 
