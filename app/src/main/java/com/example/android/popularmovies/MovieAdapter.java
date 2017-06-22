@@ -25,63 +25,65 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     final private ListItemClickListener mOnClickListener;
 
-    public MovieAdapter(Context context, ArrayList<Movie> movieList, ListItemClickListener listItemClickListener){
 
-        this.context = context;
-        this.mNumberItems = movieList.size();
+    public MovieAdapter(ArrayList<Movie> movieList, int size, ListItemClickListener listItemClickListener){
+        Log.e("MovieAdapter:", "Setting up the adapter");
+        this.mNumberItems = size;
         this.listOfMovies = movieList;
         this.mOnClickListener = listItemClickListener;
 
     }
 
-    public interface ListItemClickListener{
-        void onListItemClicked(int clickedItemIndex);
+    @Override
+    public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
+        Log.e("OnCreateViewHolder:", "CreatingViewHolder");
+        int layoutIdForListItem = R.layout.movie_item;
+        context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
+
+        View view = inflater.inflate(layoutIdForListItem, parent, false);
+
+        return new MovieViewHolder(view);
     }
+
+    @Override
+    public void onBindViewHolder(MovieAdapter.MovieViewHolder holder, int position) {
+        Log.e("OnBindViewHolder:", "Binding The View");
+        int width = context.getResources().getDisplayMetrics().widthPixels;
+        Picasso.with(context).load(context.getResources().getString(R.string.poster_prefix)+ listOfMovies.get(position).getPosterPath()).resize(width/2, 0).into(holder.listItemMovieView);
+    }
+
+    @Override
+    public int getItemCount() {
+        Log.e("getItemCount:", "getting the old Item Count" + listOfMovies.size());
+        return listOfMovies.size();
+    }
+
+
 
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         ImageView listItemMovieView;
 
         public MovieViewHolder(View itemView){
             super(itemView);
-            itemView.setOnClickListener(this);
+            Log.e("MovieViewHolder:", "Creating Inner Class Movie View Holder");
 
             listItemMovieView = (ImageView) itemView.findViewById(R.id.movie_item_number);
+
+            itemView.setOnClickListener(this);
         }
 
 
         @Override
         public void onClick(View v) {
+            Log.e("OnClick:", "MovieViewHolder has been clicked");
             int clickedPosition = getAdapterPosition();
             mOnClickListener.onListItemClicked(clickedPosition);
         }
     }
 
-
-    @Override
-    public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
-
-        int layoutIdForListItem = R.layout.movie_item;
-        LayoutInflater inflater = LayoutInflater.from(context);
-        boolean shouldAttachToParentImmediately = false;
-
-        View view = inflater.inflate(layoutIdForListItem, parent, shouldAttachToParentImmediately);
-        MovieViewHolder viewHolder = new MovieViewHolder(view);
-
-        return viewHolder;
+    public interface ListItemClickListener{
+        void onListItemClicked(int clickedItemIndex);
     }
-
-    @Override
-    public void onBindViewHolder(MovieAdapter.MovieViewHolder holder, int position) {
-        int width = context.getResources().getDisplayMetrics().widthPixels;
-        Picasso.with(context).load(context.getResources().getString(R.string.poster_prefix)+ listOfMovies.get(position).getPosterPath()).resize(width/2, 0).into(holder.listItemMovieView);
-    }
-
-
-    @Override
-    public int getItemCount() {
-        return listOfMovies.size();
-    }
-
-
 
 }

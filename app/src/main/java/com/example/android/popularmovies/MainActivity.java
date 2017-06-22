@@ -28,32 +28,32 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements MovieAdapter.ListItemClickListener{
 
     private TextView mTextView;
-
     private MovieAdapter mAdapter;
     private RecyclerView mMovieList;
-    private MainActivity mainActivity = this;
-    private ArrayList<Movie> listOfMovies = new ArrayList<Movie>();
+    private MainActivity mainActivity;
+    private ArrayList<Movie> listOfMovies;
     private Toast mToast;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-//        mTextView = (TextView) findViewById(R.id.textView_default);
-        //mTextView.setText(getResources().getString(R.string.welcome));
-        listOfMovies.clear();
-        GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 3);
-
+        mainActivity = this;
         mMovieList = (RecyclerView) findViewById(R.id.rv_movies);
+        GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 3);
         mMovieList.setLayoutManager(layoutManager);
-        mMovieList.setHasFixedSize(true);
-        mAdapter = new MovieAdapter(getApplicationContext(),listOfMovies, this);
+
+        mTextView = (TextView) findViewById(R.id.textView_default);
+        mTextView.setText(getResources().getString(R.string.welcome));
 
         connectToTMDB("popular");
-
-
-
         //TODO REQUIREMENT Movies should be displayed in the main layout once the app starts, device orientation changes etc.
+    }
+
+    public void connectToTMDB(String query){
+        String connectionString = "https://api.themoviedb.org/3/movie/"+ query + "?api_key=" + getResources().getString(R.string.api_key);
+        URL movieSearchUrl =  NetworkUtils.buildURL(connectionString);
+        new GetTMDBResults().execute(movieSearchUrl);
     }
 
     @Override
@@ -83,28 +83,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
         return super.onOptionsItemSelected(item);
     }
 
-    public void connectToTMDB(String query){
-        String connectionString = "https://api.themoviedb.org/3/movie/"+ query + "?api_key=" + getResources().getString(R.string.api_key);
-        URL movieSearchUrl =  NetworkUtils.buildURL(connectionString);
-        new GetTMDBResults().execute(movieSearchUrl);
-    }
-
-    private void setUpRecyclerView(){
-        Log.e("setUpRecyclerView:", " entering method");
-
-
-
-
-        mMovieList.setAdapter(mAdapter);
-
-
-
-
-//        mTextView.setVisibility(View.INVISIBLE);
-
-//        mMovieList.setVisibility(View.VISIBLE);
-    }
-
     @Override
     public void onListItemClicked(int clickedItemIndex) {
         if(mToast != null){
@@ -129,8 +107,16 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
         startActivity(intentToStartAct);
     }
 
+
+
     public class GetTMDBResults extends AsyncTask<URL, Void, String>{
         //TODO SUGGESTION Consider using AsyncTaskLoader
+
+        @Override
+        protected void onPreExecute(){
+            super.onPreExecute();
+            listOfMovies = new ArrayList<>();
+        }
 
         @Override
         protected String doInBackground(URL... params) {
@@ -143,40 +129,53 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.List
             }
 
             if(TMDBResults != null && !TMDBResults.equals("")) {
-                jsonParser(TMDBResults);
+                listOfMovies = jsonParser(TMDBResults);
             }
 
+            Log.e("doInBack:", "Creating MovieAdapter");
+            mAdapter = new MovieAdapter(listOfMovies, 20, mainActivity);
+            Log.e("mAdapter Is:", "" + mAdapter.equals(null));
+            Log.e("doInBack:", "MovieAdapter Created");
             return TMDBResults;
             //TODO AWESOME You're doing network operations on a background thread.
         }
 
         @Override
         protected void onPostExecute(String TMDBResults){
-            Log.e("On Post:", "Results back: "+TMDBResults);
-                setUpRecyclerView();
+            Log.e("On Post:", "Results back!");
 
-//            setUpRecyclerView();
-//            if(TMDBResults != null && !TMDBResults.equals("")){
-//                jsonParser(TMDBResults);
-                //TODO SUGGESTION Consider moving this into doInBackground rather than doing it on your UI thread
-//            }
+
+
+            Log.e("On Post:", "MovieAdapter is being set");
+            mMovieList.setAdapter(mAdapter);
+
+
+
+            mTextView.setVisibility(View.INVISIBLE);
+
+            mMovieList.setVisibility(View.VISIBLE);
+                //TODO SUGGESTION Consider moving this into doInBackground rather than doing it on your UI thread DONE
+
         }
 
-        private void jsonParser(String TMDBResults){
+        private ArrayList jsonParser(String TMDBResults){
             JSONObject results = null;
             JSONArray movie = null;
+            ArrayList arrayListMovies = new ArrayList();
             try{
                 results = new JSONObject(TMDBResults);
                 movie = results.getJSONArray("results");
 
                 for(int i=0; i<movie.length(); i++){
                     Movie mov = new Movie(movie.getJSONObject(i));
-                    listOfMovies.add(mov);
+                    arrayListMovies.add(mov);
                 }
 
             }catch(JSONException e){
                 e.printStackTrace();
             }
+
+            return arrayListMovies;
         }
 
 
